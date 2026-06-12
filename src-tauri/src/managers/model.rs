@@ -206,6 +206,37 @@ impl ModelManager {
         );
 
         available_models.insert(
+            "turbo-q5".to_string(),
+            ModelInfo {
+                id: "turbo-q5".to_string(),
+                name: "VoiceFlow Standard".to_string(),
+                description: "Recommended - fast, accurate Vietnamese, handles mixed-in English."
+                    .to_string(),
+                filename: "ggml-large-v3-turbo-q5_0.bin".to_string(),
+                url: Some(
+                    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin"
+                        .to_string(),
+                ),
+                sha256: Some(
+                    "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2".to_string(),
+                ),
+                size_mb: 547,
+                is_downloaded: false,
+                is_downloading: false,
+                partial_size: 0,
+                is_directory: false,
+                engine_type: EngineType::Whisper,
+                accuracy_score: 0.80,
+                speed_score: 0.65,
+                supports_translation: false,
+                is_recommended: true,
+                supported_languages: whisper_languages.clone(),
+                supports_language_selection: true,
+                is_custom: false,
+            },
+        );
+
+        available_models.insert(
             "large".to_string(),
             ModelInfo {
                 id: "large".to_string(),
@@ -318,7 +349,7 @@ impl ModelManager {
                 accuracy_score: 0.80,
                 speed_score: 0.85,
                 supports_translation: false,
-                is_recommended: true,
+                is_recommended: false,
                 supported_languages: parakeet_v3_languages,
                 supports_language_selection: false,
                 is_custom: false,

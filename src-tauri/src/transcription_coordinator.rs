@@ -8,6 +8,9 @@ use std::time::{Duration, Instant};
 use tauri::{AppHandle, Manager};
 
 const DEBOUNCE: Duration = Duration::from_millis(30);
+/// A press shorter than this is a "tap": recording continues until the next tap
+/// (superwhisper-style). Holding longer makes release stop the recording.
+const TAP_THRESHOLD: Duration = Duration::from_millis(500);
 
 /// Commands processed sequentially by the coordinator thread.
 enum Command {
@@ -38,7 +41,7 @@ pub struct TranscriptionCoordinator {
 }
 
 pub fn is_transcribe_binding(id: &str) -> bool {
-    id == "transcribe" || id == "transcribe_with_post_process"
+    id == "transcribe" || id == "transcribe_toggle" || id == "transcribe_with_post_process"
 }
 
 impl TranscriptionCoordinator {
@@ -49,6 +52,8 @@ impl TranscriptionCoordinator {
             let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                 let mut stage = Stage::Idle;
                 let mut last_press: Option<Instant> = None;
+                let mut press_started: Option<Instant> = None;
+                let mut saw_release = false;
 
                 while let Ok(cmd) = rx.recv() {
                     match cmd {
@@ -70,12 +75,33 @@ impl TranscriptionCoordinator {
                             }
 
                             if push_to_talk {
-                                if is_pressed && matches!(stage, Stage::Idle) {
-                                    start(&app, &mut stage, &binding_id, &hotkey_string);
-                                } else if !is_pressed
-                                    && matches!(&stage, Stage::Recording(id) if id == &binding_id)
+                                // Hybrid mode: hold = push-to-talk, quick tap = hands-free
+                                // toggle (tap again to stop), matching superwhisper.
+                                if is_pressed {
+                                    match &stage {
+                                        Stage::Idle => {
+                                            start(&app, &mut stage, &binding_id, &hotkey_string);
+                                            press_started = Some(Instant::now());
+                                            saw_release = false;
+                                        }
+                                        Stage::Recording(id) if id == &binding_id => {
+                                            // Presses with no release in between are OS
+                                            // key-repeat during a hold — ignore those.
+                                            if saw_release {
+                                                stop(&app, &mut stage, &binding_id, &hotkey_string);
+                                            }
+                                        }
+                                        _ => {
+                                            debug!("Ignoring press for '{binding_id}': pipeline busy")
+                                        }
+                                    }
+                                } else if matches!(&stage, Stage::Recording(id) if id == &binding_id)
                                 {
-                                    stop(&app, &mut stage, &binding_id, &hotkey_string);
+                                    if press_started.map_or(true, |t| t.elapsed() >= TAP_THRESHOLD) {
+                                        stop(&app, &mut stage, &binding_id, &hotkey_string);
+                                    } else {
+                                        saw_release = true;
+                                    }
                                 }
                             } else if is_pressed {
                                 match &stage {

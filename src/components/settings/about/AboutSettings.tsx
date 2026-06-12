@@ -1,3 +1,4 @@
+import donateQr from "../../../assets/vietqr-donate.png";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { getVersion } from "@tauri-apps/api/app";
@@ -29,7 +30,7 @@ export const AboutSettings: React.FC = () => {
 
   const handleDonateClick = async () => {
     try {
-      await openUrl("https://handy.computer/donate");
+      await openUrl("https://10xlifeos.com");
     } catch (error) {
       console.error("Failed to open donate link:", error);
     }
@@ -52,10 +53,18 @@ export const AboutSettings: React.FC = () => {
           title={t("settings.about.supportDevelopment.title")}
           description={t("settings.about.supportDevelopment.description")}
           grouped={true}
+          layout="stacked"
         >
-          <Button variant="primary" size="md" onClick={handleDonateClick}>
-            {t("settings.about.supportDevelopment.button")}
-          </Button>
+          <div className="flex flex-col items-start gap-3">
+            <img
+              src={donateQr}
+              alt={t("settings.about.supportDevelopment.qrAlt")}
+              className="w-44 rounded-md"
+            />
+            <Button variant="primary" size="md" onClick={handleDonateClick}>
+              {t("settings.about.supportDevelopment.button")}
+            </Button>
+          </div>
         </SettingContainer>
 
         <SettingContainer

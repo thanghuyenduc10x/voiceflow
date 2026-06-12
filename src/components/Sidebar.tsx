@@ -48,7 +48,7 @@ export const SECTIONS_CONFIG = {
     labelKey: "sidebar.advanced",
     icon: Cog,
     component: AdvancedSettings,
-    enabled: () => true,
+    enabled: (settings) => settings?.debug_mode ?? false,
   },
   history: {
     labelKey: "sidebar.history",

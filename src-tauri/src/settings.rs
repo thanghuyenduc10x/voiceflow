@@ -197,7 +197,7 @@ impl Default for PasteMethod {
 
 impl Default for ClipboardHandling {
     fn default() -> Self {
-        ClipboardHandling::DontModify
+        ClipboardHandling::CopyToClipboard
     }
 }
 
@@ -453,11 +453,11 @@ fn default_autostart_enabled() -> bool {
 }
 
 fn default_update_checks_enabled() -> bool {
-    true
+    false
 }
 
 fn default_selected_language() -> String {
-    "auto".to_string()
+    "vi".to_string()
 }
 
 fn default_overlay_position() -> OverlayPosition {
@@ -733,6 +733,22 @@ pub fn get_default_settings() -> AppSettings {
             current_binding: default_shortcut.to_string(),
         },
     );
+    #[cfg(target_os = "macos")]
+    let default_toggle_shortcut = "ctrl+option+space";
+    #[cfg(not(target_os = "macos"))]
+    let default_toggle_shortcut = "ctrl+alt+space";
+
+    bindings.insert(
+        "transcribe_toggle".to_string(),
+        ShortcutBinding {
+            id: "transcribe_toggle".to_string(),
+            name: "Hands-free recording".to_string(),
+            description: "Tap once to start recording, tap again to finish.".to_string(),
+            default_binding: default_toggle_shortcut.to_string(),
+            current_binding: default_toggle_shortcut.to_string(),
+        },
+    );
+
     #[cfg(target_os = "windows")]
     let default_post_process_shortcut = "ctrl+shift+space";
     #[cfg(target_os = "macos")]
@@ -779,7 +795,7 @@ pub fn get_default_settings() -> AppSettings {
         clamshell_microphone: None,
         selected_output_device: None,
         translate_to_english: false,
-        selected_language: "auto".to_string(),
+        selected_language: "vi".to_string(),
         overlay_position: default_overlay_position(),
         debug_mode: false,
         log_level: default_log_level(),

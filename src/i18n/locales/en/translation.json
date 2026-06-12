@@ -92,6 +92,10 @@
       "cohere-int8": {
         "name": "Cohere",
         "description": "A large, slower, but very accurate multilingual model."
+      },
+      "turbo-q5": {
+        "name": "VoiceFlow Standard",
+        "description": "Recommended — fast, accurate Vietnamese, handles mixed-in English."
       }
     },
     "errors": {
@@ -100,7 +104,7 @@
     },
     "permissions": {
       "title": "Permissions Required",
-      "description": "Handy needs a couple of permissions to work properly.",
+      "description": "VoiceFlow needs a couple of permissions to work properly.",
       "microphone": {
         "title": "Microphone Access",
         "description": "Required to hear your voice for transcription."
@@ -158,7 +162,7 @@
     "general": {
       "title": "General",
       "shortcut": {
-        "title": "Handy Shortcuts",
+        "title": "VoiceFlow Shortcuts",
         "description": "Configure keyboard shortcuts to trigger speech-to-text recording",
         "loading": "Loading shortcuts...",
         "none": "No shortcuts configured",
@@ -166,8 +170,8 @@
         "pressKeys": "Press keys...",
         "bindings": {
           "transcribe": {
-            "name": "Transcribe Shortcut",
-            "description": "The keyboard shortcut to record and transcribe your voice."
+            "name": "Hold to talk",
+            "description": "Hold the key, speak, release to finish. A very quick tap switches to hands-free recording."
           },
           "cancel": {
             "name": "Cancel Shortcut",
@@ -176,6 +180,10 @@
           "transcribe_with_post_process": {
             "name": "Post-Processing Hotkey",
             "description": "Optional: A dedicated hotkey that always applies AI post-processing to your transcription."
+          },
+          "transcribe_toggle": {
+            "name": "Tap to record (hands-free)",
+            "description": "Tap once to start, tap again to finish — for longer passages."
           }
         },
         "errors": {
@@ -194,7 +202,7 @@
       },
       "pushToTalk": {
         "label": "Push To Talk",
-        "description": "Hold to record, release to stop"
+        "description": "On: hold the key to talk, release to finish. Quick-tap to keep recording, tap again to stop."
       }
     },
     "models": {
@@ -276,11 +284,11 @@
       },
       "autostart": {
         "label": "Launch on Startup",
-        "description": "Automatically start Handy when you log in to your computer."
+        "description": "Automatically start VoiceFlow when you log in to your computer."
       },
       "showTrayIcon": {
         "label": "Show Tray Icon",
-        "description": "Display the Handy icon in the system tray."
+        "description": "Display the VoiceFlow icon in the system tray."
       },
       "overlay": {
         "title": "Overlay Position",
@@ -445,7 +453,7 @@
       },
       "updateChecks": {
         "label": "Check for Updates",
-        "description": "Automatically check for new versions of Handy"
+        "description": "Automatically check for new versions of VoiceFlow"
       },
       "soundTheme": {
         "label": "Sound Theme",
@@ -513,28 +521,29 @@
       "title": "About",
       "version": {
         "title": "Version",
-        "description": "Current version of Handy"
+        "description": "Current version of VoiceFlow"
       },
       "appDataDirectory": {
         "title": "App Data Directory",
-        "description": "Location where Handy stores its data"
+        "description": "Location where VoiceFlow stores its data"
       },
       "sourceCode": {
         "title": "Source Code",
-        "description": "View source code and contribute",
+        "description": "Developed by Thang Huyen Duc, based on the Handy open source project (MIT license).",
         "button": "View on GitHub"
       },
       "supportDevelopment": {
-        "title": "Support Development",
-        "description": "Help us continue building Handy",
-        "button": "Donate"
+        "title": "Support 10X LifeOS",
+        "description": "VoiceFlow is free forever. Scan the QR with any Vietnamese banking app to buy the author a coffee (Momo: 0963028523), or visit 10xlifeos.com.",
+        "button": "10xLifeOS.com",
+        "qrAlt": "VietQR code — VPBank 189997035, NGUYEN VAN THANG"
       },
       "acknowledgments": {
         "title": "Acknowledgments",
         "whisper": {
           "title": "Whisper.cpp",
           "description": "High-performance inference of OpenAI's Whisper automatic speech recognition model",
-          "details": "Handy uses Whisper.cpp for fast, local speech-to-text processing. Thanks to the amazing work by Georgi Gerganov and contributors."
+          "details": "VoiceFlow uses Whisper.cpp for fast, local speech-to-text processing. Thanks to the amazing work by Georgi Gerganov and contributors."
         }
       }
     }
@@ -580,7 +589,7 @@
   },
   "accessibility": {
     "permissionsRequired": "Accessibility Permissions Required",
-    "permissionsDescription": "Handy needs accessibility permissions to type transcribed text.",
+    "permissionsDescription": "VoiceFlow needs accessibility permissions to type transcribed text.",
     "openSettings": "Open System Settings",
     "dismiss": "Dismiss"
   },
@@ -603,7 +612,7 @@
   },
   "appLanguage": {
     "title": "Application Language",
-    "description": "Change the language of the Handy interface"
+    "description": "Change the language of the VoiceFlow interface"
   },
   "overlay": {
     "transcribing": "Transcribing...",

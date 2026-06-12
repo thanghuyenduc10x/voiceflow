@@ -92,6 +92,10 @@
       "cohere-int8": {
         "name": "Cohere",
         "description": "Mô hình lớn, chậm hơn, nhưng rất chính xác và đa ngôn ngữ."
+      },
+      "turbo-q5": {
+        "name": "VoiceFlow chuẩn",
+        "description": "Khuyên dùng — nhanh, chính xác tiếng Việt, hiểu cả từ tiếng Anh xen kẽ."
       }
     },
     "errors": {
@@ -100,7 +104,7 @@
     },
     "permissions": {
       "title": "Cần cấp quyền",
-      "description": "Handy cần một số quyền để hoạt động bình thường.",
+      "description": "VoiceFlow cần một số quyền để hoạt động bình thường.",
       "microphone": {
         "title": "Quyền truy cập Micrô",
         "description": "Cần thiết để nghe giọng nói của bạn để chuyển đổi."
@@ -176,7 +180,7 @@
     "general": {
       "title": "Chung",
       "shortcut": {
-        "title": "Phím tắt Handy",
+        "title": "Phím tắt VoiceFlow",
         "description": "Cấu hình phím tắt để kích hoạt ghi âm chuyển đổi giọng nói thành văn bản",
         "loading": "Đang tải phím tắt...",
         "none": "Chưa cấu hình phím tắt",
@@ -184,8 +188,8 @@
         "pressKeys": "Nhấn phím...",
         "bindings": {
           "transcribe": {
-            "name": "Phím tắt chuyển đổi",
-            "description": "Phím tắt để ghi âm và chuyển đổi giọng nói của bạn."
+            "name": "Giữ để nói",
+            "description": "Giữ phím, nói, thả ra là chữ hiện ra. Bấm nhả thật nhanh cũng chuyển sang ghi liên tục."
           },
           "cancel": {
             "name": "Phím tắt hủy",
@@ -194,6 +198,10 @@
           "transcribe_with_post_process": {
             "name": "Phím tắt xử lý sau",
             "description": "Tùy chọn: Phím tắt chuyên dụng luôn áp dụng xử lý sau bằng AI cho bản chuyển đổi của bạn."
+          },
+          "transcribe_toggle": {
+            "name": "Bấm để ghi liên tục",
+            "description": "Bấm một cái để bắt đầu, bấm lần nữa để kết thúc — rảnh tay cho đoạn dài."
           }
         },
         "errors": {
@@ -212,7 +220,7 @@
       },
       "pushToTalk": {
         "label": "Nhấn để nói",
-        "description": "Giữ để ghi âm, thả để dừng"
+        "description": "Bật: giữ phím để nói, thả ra là xong. Bấm nhanh một cái để ghi liên tục, bấm lần nữa để dừng."
       }
     },
     "sound": {
@@ -276,11 +284,11 @@
       },
       "autostart": {
         "label": "Khởi động cùng hệ thống",
-        "description": "Tự động khởi động Handy khi bạn đăng nhập vào máy tính."
+        "description": "Tự động khởi động VoiceFlow khi bạn đăng nhập vào máy tính."
       },
       "showTrayIcon": {
         "label": "Hiển thị biểu tượng khay",
-        "description": "Hiển thị biểu tượng Handy trong khay hệ thống."
+        "description": "Hiển thị biểu tượng VoiceFlow trong khay hệ thống."
       },
       "overlay": {
         "title": "Vị trí lớp phủ",
@@ -445,7 +453,7 @@
       },
       "updateChecks": {
         "label": "Kiểm tra cập nhật",
-        "description": "Tự động kiểm tra phiên bản mới của Handy"
+        "description": "Tự động kiểm tra phiên bản mới của VoiceFlow"
       },
       "soundTheme": {
         "label": "Chủ đề âm thanh",
@@ -513,28 +521,29 @@
       "title": "Giới thiệu",
       "version": {
         "title": "Phiên bản",
-        "description": "Phiên bản hiện tại của Handy"
+        "description": "Phiên bản hiện tại của VoiceFlow"
       },
       "appDataDirectory": {
         "title": "Thư mục dữ liệu ứng dụng",
-        "description": "Vị trí Handy lưu trữ dữ liệu"
+        "description": "Vị trí VoiceFlow lưu trữ dữ liệu"
       },
       "sourceCode": {
         "title": "Mã nguồn",
-        "description": "Xem mã nguồn và đóng góp",
+        "description": "Phát triển bởi Thắng Huyền Đức, dựa trên mã nguồn mở Handy (giấy phép MIT).",
         "button": "Xem trên GitHub"
       },
       "supportDevelopment": {
-        "title": "Hỗ trợ phát triển",
-        "description": "Giúp chúng tôi tiếp tục xây dựng Handy",
-        "button": "Quyên góp"
+        "title": "Ủng hộ 10X LifeOS",
+        "description": "VoiceFlow miễn phí mãi mãi. Quét mã QR bằng app ngân hàng bất kỳ để mời tác giả một ly cà phê (Momo: 0963028523), hoặc ghé 10xlifeos.com.",
+        "button": "10xLifeOS.com",
+        "qrAlt": "Mã VietQR — VPBank 189997035, NGUYEN VAN THANG"
       },
       "acknowledgments": {
         "title": "Lời cảm ơn",
         "whisper": {
           "title": "Whisper.cpp",
           "description": "Suy luận hiệu suất cao của mô hình nhận dạng giọng nói tự động Whisper của OpenAI",
-          "details": "Handy sử dụng Whisper.cpp để xử lý chuyển đổi giọng nói thành văn bản nhanh, cục bộ. Cảm ơn công việc tuyệt vời của Georgi Gerganov và các cộng tác viên."
+          "details": "VoiceFlow sử dụng Whisper.cpp để xử lý chuyển đổi giọng nói thành văn bản nhanh, cục bộ. Cảm ơn công việc tuyệt vời của Georgi Gerganov và các cộng tác viên."
         }
       }
     }
@@ -580,7 +589,7 @@
   },
   "accessibility": {
     "permissionsRequired": "Cần quyền truy cập",
-    "permissionsDescription": "Handy cần quyền truy cập để gõ văn bản đã chuyển đổi.",
+    "permissionsDescription": "VoiceFlow cần quyền truy cập để gõ văn bản đã chuyển đổi.",
     "openSettings": "Mở Cài đặt Hệ thống",
     "dismiss": "Bỏ qua"
   },
@@ -603,7 +612,7 @@
   },
   "appLanguage": {
     "title": "Ngôn ngữ ứng dụng",
-    "description": "Thay đổi ngôn ngữ giao diện của Handy"
+    "description": "Thay đổi ngôn ngữ giao diện của VoiceFlow"
   },
   "overlay": {
     "transcribing": "Đang chuyển đổi...",

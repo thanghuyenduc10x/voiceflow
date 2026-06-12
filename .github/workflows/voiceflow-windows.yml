@@ -1,0 +1,26 @@
+name: "VoiceFlow Windows Build"
+
+# Builds the Windows installer (.exe) on GitHub's free runners.
+# Trigger manually from the Actions tab, or automatically on push to main.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build.yml
+    with:
+      platform: "windows-latest"
+      target: "x86_64-pc-windows-msvc"
+      build-args: ""
+      upload-artifacts: true
+      sign-binaries: false
+      asset-prefix: "voiceflow"
