@@ -1,7 +1,8 @@
 import React from "react";
+import badge from "../../assets/voiceflow-badge.png";
 
 const HandyTextLogo = ({
-  width,
+  width = 160,
   height,
   className,
 }: {
@@ -9,34 +10,35 @@ const HandyTextLogo = ({
   height?: number;
   className?: string;
 }) => {
+  const badgeSize = height ?? Math.round(width * 0.34);
   return (
-    <svg
-      width={width}
-      height={height}
+    <div
       className={className}
-      viewBox="0 0 930 328"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: Math.round(badgeSize * 0.3),
+      }}
     >
-      <g className="logo-primary">
-        <rect x="60" y="124" width="36" height="80" rx="18" />
-        <rect x="116" y="84" width="36" height="160" rx="18" />
-        <rect x="172" y="44" width="36" height="240" rx="18" />
-        <rect x="228" y="104" width="36" height="120" rx="18" />
-        <rect x="284" y="134" width="36" height="60" rx="18" />
-      </g>
-      <text
-        x="350"
-        y="164"
-        dominantBaseline="central"
-        fontFamily="inherit"
-        fontSize="105"
-        fontWeight="600"
-        className="logo-primary"
+      <img
+        src={badge}
+        alt="VoiceFlow"
+        width={badgeSize}
+        height={badgeSize}
+        style={{ borderRadius: Math.round(badgeSize * 0.22), display: "block" }}
+      />
+      <span
+        style={{
+          fontSize: Math.round(badgeSize * 0.6),
+          fontWeight: 600,
+          color: "var(--color-text)",
+          letterSpacing: "-0.02em",
+          lineHeight: 1,
+        }}
       >
         VoiceFlow
-      </text>
-    </svg>
+      </span>
+    </div>
   );
 };
 
