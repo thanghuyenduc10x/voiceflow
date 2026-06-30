@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  /* Design tokens */
-  --color-text: #0f0f0f;
-  --color-background: #fbfbfb;
-  --color-background-ui: #F89920;
-  --color-logo-primary: #F89920;
-  --color-logo-stroke: #00357A;
+  /* Design tokens — 10X brand (navy + orange), always-dark */
+  --color-text: #fbfbfb;
+  --color-background: #0A0A24;
+  --color-background-ui: #C96028;
+  --color-logo-primary: #C96028;
+  --color-logo-stroke: #FFFFFF;
   --color-text-stroke: #f6f6f6;
   --color-mid-gray: #808080;
 }
@@ -54,10 +54,11 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Colors - Dark Theme */
+    /* Colors - Dark Theme — 10X brand */
     --color-text: #fbfbfb;
-    --color-background: #15233A;
-    --color-logo-primary: #F89920;
+    --color-background: #0A0A24;
+    --color-background-ui: #C96028;
+    --color-logo-primary: #C96028;
     --color-logo-stroke: #FFFFFF;
   }
 }
