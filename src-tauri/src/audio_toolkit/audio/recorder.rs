@@ -87,6 +87,11 @@ impl AudioRecorder {
         let worker = std::thread::spawn(move || {
             let stop_flag = Arc::new(AtomicBool::new(false));
             let stop_flag_for_stream = stop_flag.clone();
+            // Set by the cpal error callback when the device dies mid-stream
+            // (e.g. a wireless mic drops). Lets the consumer stop waiting for
+            // samples that will never arrive instead of hanging forever.
+            let stream_dead = Arc::new(AtomicBool::new(false));
+            let stream_dead_for_stream = stream_dead.clone();
             let init_result = (|| -> Result<(cpal::Stream, u32), String> {
                 let config = AudioRecorder::get_preferred_config(&thread_device)
                     .map_err(|e| format!("Failed to fetch preferred config: {e}"))?;
@@ -109,6 +114,7 @@ impl AudioRecorder {
                         sample_tx,
                         channels,
                         stop_flag_for_stream,
+                        stream_dead_for_stream,
                     )
                     .map_err(|e| format!("Failed to build input stream: {e}"))?,
                     cpal::SampleFormat::I8 => AudioRecorder::build_stream::<i8>(
@@ -117,6 +123,7 @@ impl AudioRecorder {
                         sample_tx,
                         channels,
                         stop_flag_for_stream,
+                        stream_dead_for_stream,
                     )
                     .map_err(|e| format!("Failed to build input stream: {e}"))?,
                     cpal::SampleFormat::I16 => AudioRecorder::build_stream::<i16>(
@@ -125,6 +132,7 @@ impl AudioRecorder {
                         sample_tx,
                         channels,
                         stop_flag_for_stream,
+                        stream_dead_for_stream,
                     )
                     .map_err(|e| format!("Failed to build input stream: {e}"))?,
                     cpal::SampleFormat::I32 => AudioRecorder::build_stream::<i32>(
@@ -133,6 +141,7 @@ impl AudioRecorder {
                         sample_tx,
                         channels,
                         stop_flag_for_stream,
+                        stream_dead_for_stream,
                     )
                     .map_err(|e| format!("Failed to build input stream: {e}"))?,
                     cpal::SampleFormat::F32 => AudioRecorder::build_stream::<f32>(
@@ -141,6 +150,7 @@ impl AudioRecorder {
                         sample_tx,
                         channels,
                         stop_flag_for_stream,
+                        stream_dead_for_stream,
                     )
                     .map_err(|e| format!("Failed to build input stream: {e}"))?,
                     sample_format => {
@@ -159,7 +169,15 @@ impl AudioRecorder {
                 Ok((stream, sample_rate)) => {
                     let _ = init_tx.send(Ok(()));
                     // Keep the stream alive while we process samples.
-                    run_consumer(sample_rate, vad, sample_rx, cmd_rx, level_cb, stop_flag);
+                    run_consumer(
+                        sample_rate,
+                        vad,
+                        sample_rx,
+                        cmd_rx,
+                        level_cb,
+                        stop_flag,
+                        stream_dead,
+                    );
                     drop(stream);
                 }
                 Err(error_message) => {
@@ -203,10 +221,14 @@ impl AudioRecorder {
     }
 
     pub fn stop(&self) -> Result<Vec<f32>, Box<dyn std::error::Error>> {
+        // If there is no worker to talk to, return empty instead of blocking
+        // forever: resp_tx would otherwise never be sent or dropped, so
+        // resp_rx.recv() would hang on a phantom sender.
+        let Some(tx) = &self.cmd_tx else {
+            return Ok(Vec::new());
+        };
         let (resp_tx, resp_rx) = mpsc::channel();
-        if let Some(tx) = &self.cmd_tx {
-            tx.send(Cmd::Stop(resp_tx))?;
-        }
+        tx.send(Cmd::Stop(resp_tx))?;
         Ok(resp_rx.recv()?) // wait for the samples
     }
 
@@ -227,6 +249,7 @@ impl AudioRecorder {
         sample_tx: mpsc::Sender<AudioChunk>,
         channels: usize,
         stop_flag: Arc<AtomicBool>,
+        stream_dead: Arc<AtomicBool>,
     ) -> Result<cpal::Stream, cpal::BuildStreamError>
     where
         T: Sample + SizedSample + Send + 'static,
@@ -234,6 +257,11 @@ impl AudioRecorder {
     {
         let mut output_buffer = Vec::new();
         let mut eos_sent = false;
+
+        // The data callback takes ownership of sample_tx/stop_flag, so clone
+        // handles for the error callback to signal a dead stream.
+        let err_sample_tx = sample_tx.clone();
+        let err_stop_flag = stop_flag.clone();
 
         let stream_cb = move |data: &[T], _: &cpal::InputCallbackInfo| {
             if stop_flag.load(Ordering::Relaxed) {
@@ -271,12 +299,20 @@ impl AudioRecorder {
             }
         };
 
-        device.build_input_stream(
-            &config.clone().into(),
-            stream_cb,
-            |err| log::error!("Stream error: {}", err),
-            None,
-        )
+        let err_cb = move |err| {
+            log::error!("Stream error: {}", err);
+            // A cpal input-stream error is effectively fatal (the device is
+            // gone — unplugged mic, Bluetooth dropout, default-device switch).
+            // The data callback stops firing, so without this the consumer
+            // would block forever on `recv()`. Mark the stream dead, set the
+            // stop flag, and push an EndOfStream sentinel so the consumer
+            // unblocks and `stop()` can return promptly.
+            stream_dead.store(true, Ordering::Relaxed);
+            err_stop_flag.store(true, Ordering::Relaxed);
+            let _ = err_sample_tx.send(AudioChunk::EndOfStream);
+        };
+
+        device.build_input_stream(&config.clone().into(), stream_cb, err_cb, None)
     }
 
     fn get_preferred_config(
@@ -399,6 +435,7 @@ fn run_consumer(
     cmd_rx: mpsc::Receiver<Cmd>,
     level_cb: Option<Arc<dyn Fn(Vec<f32>) + Send + Sync + 'static>>,
     stop_flag: Arc<AtomicBool>,
+    stream_dead: Arc<AtomicBool>,
 ) {
     let mut frame_resampler = FrameResampler::new(
         in_sample_rate as usize,
@@ -452,9 +489,92 @@ fn run_consumer(
     }
 
     loop {
-        let chunk = match sample_rx.recv() {
+        // Service pending commands FIRST, every iteration, so Cmd::Stop and
+        // Cmd::Shutdown are handled even when the device has gone silent and no
+        // more audio chunks arrive (e.g. the mic was unplugged mid-recording).
+        // The previous design only drained commands *after* receiving a sample,
+        // so a dead device left this loop blocked on recv() forever and the
+        // whole pipeline wedged in "busy" until the app was restarted.
+        let mut should_return = false;
+        while let Ok(cmd) = cmd_rx.try_recv() {
+            match cmd {
+                Cmd::Start => {
+                    stop_flag.store(false, Ordering::Relaxed);
+                    stream_dead.store(false, Ordering::Relaxed);
+                    processed_samples.clear();
+                    recording = true;
+                    visualizer.reset();
+                    if let Some(v) = &vad {
+                        v.lock().unwrap().reset();
+                    }
+                }
+                Cmd::Stop(reply_tx) => {
+                    recording = false;
+                    stop_flag.store(true, Ordering::Relaxed);
+
+                    if stream_dead.load(Ordering::Relaxed) {
+                        // The device is gone: the callback won't emit an
+                        // EndOfStream sentinel, so don't block waiting for one.
+                        // Drain whatever is already buffered and move on.
+                        while let Ok(chunk) = sample_rx.try_recv() {
+                            if let AudioChunk::Samples(remaining) = chunk {
+                                frame_resampler.push(&remaining, &mut |frame: &[f32]| {
+                                    handle_frame(frame, true, &vad, &mut processed_samples)
+                                });
+                            }
+                        }
+                    } else {
+                        // Normal path: drain remaining audio until the producer
+                        // confirms end-of-stream. The cpal callback sees the stop
+                        // flag, sends EndOfStream, and goes silent — guaranteeing
+                        // every captured sample is in the channel ahead of the
+                        // sentinel. Bounded so a missed sentinel can't hang us.
+                        loop {
+                            match sample_rx.recv_timeout(Duration::from_secs(2)) {
+                                Ok(AudioChunk::Samples(remaining)) => {
+                                    frame_resampler.push(&remaining, &mut |frame: &[f32]| {
+                                        handle_frame(frame, true, &vad, &mut processed_samples)
+                                    });
+                                }
+                                Ok(AudioChunk::EndOfStream) => break,
+                                Err(_) => {
+                                    log::warn!(
+                                        "Timed out waiting for EndOfStream from audio callback"
+                                    );
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    frame_resampler.finish(&mut |frame: &[f32]| {
+                        handle_frame(frame, true, &vad, &mut processed_samples)
+                    });
+
+                    let _ = reply_tx.send(std::mem::take(&mut processed_samples));
+
+                    // Resume the audio callback so the consumer loop can continue
+                    // receiving chunks (important for always-on microphone mode).
+                    stop_flag.store(false, Ordering::Relaxed);
+                }
+                Cmd::Shutdown => {
+                    stop_flag.store(true, Ordering::Relaxed);
+                    should_return = true;
+                    break;
+                }
+            }
+        }
+        if should_return {
+            return;
+        }
+
+        // Receive audio with a timeout so we loop back to re-check commands even
+        // when the stream produces no callbacks (silent or dead device). During
+        // normal recording samples arrive every ~30ms, so this adds no latency.
+        let chunk = match sample_rx.recv_timeout(Duration::from_millis(200)) {
             Ok(c) => c,
-            Err(_) => break, // stream closed
+            Err(mpsc::RecvTimeoutError::Timeout) => continue,
+            Err(mpsc::RecvTimeoutError::Disconnected) => break, // stream closed
         };
 
         let raw = match chunk {
@@ -473,57 +593,5 @@ fn run_consumer(
         frame_resampler.push(&raw, &mut |frame: &[f32]| {
             handle_frame(frame, recording, &vad, &mut processed_samples)
         });
-
-        // non-blocking check for a command
-        while let Ok(cmd) = cmd_rx.try_recv() {
-            match cmd {
-                Cmd::Start => {
-                    stop_flag.store(false, Ordering::Relaxed);
-                    processed_samples.clear();
-                    recording = true;
-                    visualizer.reset();
-                    if let Some(v) = &vad {
-                        v.lock().unwrap().reset();
-                    }
-                }
-                Cmd::Stop(reply_tx) => {
-                    recording = false;
-                    stop_flag.store(true, Ordering::Relaxed);
-
-                    // Drain all remaining audio until the producer confirms end-of-stream.
-                    // The cpal callback sees the stop flag, sends EndOfStream, and goes
-                    // silent — guaranteeing every captured sample is in the channel
-                    // ahead of the sentinel.
-                    loop {
-                        match sample_rx.recv_timeout(Duration::from_secs(2)) {
-                            Ok(AudioChunk::Samples(remaining)) => {
-                                frame_resampler.push(&remaining, &mut |frame: &[f32]| {
-                                    handle_frame(frame, true, &vad, &mut processed_samples)
-                                });
-                            }
-                            Ok(AudioChunk::EndOfStream) => break,
-                            Err(_) => {
-                                log::warn!("Timed out waiting for EndOfStream from audio callback");
-                                break;
-                            }
-                        }
-                    }
-
-                    frame_resampler.finish(&mut |frame: &[f32]| {
-                        handle_frame(frame, true, &vad, &mut processed_samples)
-                    });
-
-                    let _ = reply_tx.send(std::mem::take(&mut processed_samples));
-
-                    // Resume the audio callback so the consumer loop can continue
-                    // receiving chunks (important for always-on microphone mode).
-                    stop_flag.store(false, Ordering::Relaxed);
-                }
-                Cmd::Shutdown => {
-                    stop_flag.store(true, Ordering::Relaxed);
-                    return;
-                }
-            }
-        }
     }
 }
