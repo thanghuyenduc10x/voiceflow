@@ -741,7 +741,22 @@ pub fn apply_accelerator_settings(app: &tauri::AppHandle) {
     let settings = get_settings(app);
 
     let whisper_pref = match settings.whisper_accelerator {
-        WhisperAcceleratorSetting::Auto => accel::WhisperAccelerator::Auto,
+        WhisperAcceleratorSetting::Auto => {
+            // On Windows the GPU backend is Vulkan. Laptops with only an Intel
+            // integrated GPU run whisper on the iGPU, which shares system RAM;
+            // on 8GB machines large-v3-turbo then exhausts memory and freezes
+            // the app mid-transcription. So default "Auto" to CPU on Windows
+            // (stable on every machine). An explicit "Gpu" choice still uses
+            // the GPU for users who have a capable discrete card.
+            #[cfg(target_os = "windows")]
+            {
+                accel::WhisperAccelerator::CpuOnly
+            }
+            #[cfg(not(target_os = "windows"))]
+            {
+                accel::WhisperAccelerator::Auto
+            }
+        }
         WhisperAcceleratorSetting::Cpu => accel::WhisperAccelerator::CpuOnly,
         WhisperAcceleratorSetting::Gpu => accel::WhisperAccelerator::Gpu,
     };
