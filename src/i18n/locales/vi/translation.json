@@ -135,12 +135,12 @@
     "extractingGeneric": "Đang giải nén...",
     "downloading": "Đang tải xuống {{percentage}}%",
     "downloadingMultiple": "Đang tải xuống {{count}} mô hình...",
-    "modelReady": "Mô Hình Sẵn Sàng",
+    "modelReady": "Mô hình sẵn sàng",
     "loading": "Đang tải {{modelName}}...",
     "loadingGeneric": "Đang tải...",
-    "modelError": "Lỗi Mô Hình",
-    "modelUnloaded": "Mô Hình Đã Gỡ",
-    "noModelDownloadRequired": "Chưa Có Mô Hình - Cần Tải Xuống",
+    "modelError": "Lỗi mô hình",
+    "modelUnloaded": "Mô hình đã gỡ",
+    "noModelDownloadRequired": "Chưa có mô hình - Cần tải xuống",
     "deleteModel": "Xóa {{modelName}}",
     "downloadSpeed": "{{speed}} MB/s",
     "capabilities": {
@@ -314,9 +314,9 @@
       },
       "typingTool": {
         "title": "Công cụ gõ",
-        "description": "Chọn công cụ gõ trên Linux cho phương thức dán trực tiếp. Auto sẽ tự động phát hiện và dùng công cụ tốt nhất có sẵn cho hệ thống của bạn.",
+        "description": "Chọn công cụ gõ trên Linux cho phương thức dán trực tiếp. \"Tự động\" sẽ phát hiện và dùng công cụ tốt nhất có sẵn cho hệ thống của bạn.",
         "options": {
-          "auto": "Auto (Khuyến nghị)"
+          "auto": "Tự động (Khuyến nghị)"
         }
       },
       "clipboardHandling": {
@@ -585,7 +585,11 @@
     "off": "Tắt",
     "yes": "Có",
     "no": "Không",
-    "noOptionsFound": "Không tìm thấy tùy chọn"
+    "noOptionsFound": "Không tìm thấy tùy chọn",
+    "downloading": "Đang tải...",
+    "nDownloading": "Đang tải {{count}} mục...",
+    "selectOption": "Chọn một mục...",
+    "modelStatus": "Trạng thái mô hình: {{status}}"
   },
   "accessibility": {
     "permissionsRequired": "Cần quyền truy cập",

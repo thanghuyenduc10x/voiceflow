@@ -20,8 +20,9 @@ const RecordingOverlay: React.FC = () => {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
   const [state, setState] = useState<OverlayState>("recording");
-  const [levels, setLevels] = useState<number[]>(Array(16).fill(0));
-  const smoothedLevelsRef = useRef<number[]>(Array(16).fill(0));
+  const [levels, setLevels] = useState<number[]>(Array(9).fill(0));
+  const smoothedLevelsRef = useRef<number[]>(Array(9).fill(0));
+  const [isDragging, setIsDragging] = useState(false);
   const direction = getLanguageDirection(i18n.language);
 
   useEffect(() => {
@@ -128,7 +129,10 @@ const RecordingOverlay: React.FC = () => {
     if (!s) return;
     const dx = e.screenX - s.startScreenX;
     const dy = e.screenY - s.startScreenY;
-    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) s.moved = true;
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+      if (!s.moved) setIsDragging(true);
+      s.moved = true;
+    }
     s.lastX = s.startWinX + dx;
     s.lastY = s.startWinY + dy;
     if (s.raf == null) s.raf = requestAnimationFrame(applyMove);
@@ -148,13 +152,18 @@ const RecordingOverlay: React.FC = () => {
       commands.setOverlayCustomPosition(s.lastX, s.lastY);
     }
     dragRef.current = null;
+    setIsDragging(false);
   };
 
   return (
     <div
       dir={direction}
       className={`recording-overlay ${isVisible ? "fade-in" : ""}`}
-      style={{ cursor: "grab", userSelect: "none", touchAction: "none" }}
+      style={{
+        cursor: isDragging ? "grabbing" : "grab",
+        userSelect: "none",
+        touchAction: "none",
+      }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}

@@ -11,6 +11,8 @@ const HandyTextLogo = ({
   className?: string;
 }) => {
   const badgeSize = height ?? Math.round(width * 0.34);
+  // Brand name — intentionally not translated.
+  const brandName = "VoiceFlow";
   return (
     <div
       className={className}
@@ -36,7 +38,7 @@ const HandyTextLogo = ({
           lineHeight: 1,
         }}
       >
-        VoiceFlow
+        {brandName}
       </span>
     </div>
   );

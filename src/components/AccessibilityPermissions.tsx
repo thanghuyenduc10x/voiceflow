@@ -72,12 +72,12 @@ const AccessibilityPermissions: React.FC = () => {
     request: {
       text: t("accessibility.openSettings"),
       className:
-        "px-2 py-1 text-sm font-semibold bg-mid-gray/10 border  border-mid-gray/80 hover:bg-logo-primary/10 rounded cursor-pointer hover:border-logo-primary",
+        "px-2 py-1 text-sm font-semibold bg-mid-gray/10 border border-mid-gray/80 hover:bg-logo-primary/10 rounded-lg cursor-pointer hover:border-logo-primary",
     },
     verify: {
       text: t("accessibility.openSettings"),
       className:
-        "bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-1 px-3 rounded-md text-sm flex items-center justify-center cursor-pointer",
+        "px-2 py-1 text-sm font-semibold bg-mid-gray/10 border border-mid-gray/80 hover:bg-logo-primary/10 rounded-lg cursor-pointer hover:border-logo-primary",
     },
     granted: null,
   };

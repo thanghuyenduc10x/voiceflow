@@ -95,17 +95,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div className="flex flex-col w-40 h-full border-e border-mid-gray/20 items-center px-2">
       <HandyTextLogo width={120} className="m-4" />
-      <div className="flex flex-col w-full items-center gap-1 pt-2 border-t border-mid-gray/20">
+      <nav
+        aria-label="Settings sections"
+        className="flex flex-col w-full items-center gap-1 pt-2 border-t border-mid-gray/20"
+      >
         {availableSections.map((section) => {
           const Icon = section.icon;
           const isActive = activeSection === section.id;
 
           return (
-            <div
+            <button
+              type="button"
               key={section.id}
-              className={`flex gap-2 items-center p-2 w-full rounded-lg cursor-pointer transition-colors ${
+              aria-current={isActive ? "page" : undefined}
+              className={`flex gap-2 items-center p-2 w-full text-left rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary focus-visible:ring-inset ${
                 isActive
-                  ? "bg-logo-primary/80"
+                  ? "bg-logo-primary/80 hover:bg-logo-primary"
                   : "hover:bg-mid-gray/20 hover:opacity-100 opacity-85"
               }`}
               onClick={() => onSectionChange(section.id)}
@@ -117,10 +122,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               >
                 {t(section.labelKey)}
               </p>
-            </div>
+            </button>
           );
         })}
-      </div>
+      </nav>
     </div>
   );
 };

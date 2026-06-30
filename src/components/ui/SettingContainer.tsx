@@ -48,8 +48,8 @@ export const SettingContainer: React.FC<SettingContainerProps> = ({
   };
 
   const containerClasses = grouped
-    ? "px-4 p-2"
-    : "px-4 p-2 rounded-lg border border-mid-gray/20";
+    ? "px-4 py-2"
+    : "px-4 py-2 rounded-lg border border-mid-gray/20";
 
   if (layout === "stacked") {
     if (descriptionMode === "tooltip") {
@@ -69,7 +69,7 @@ export const SettingContainer: React.FC<SettingContainerProps> = ({
               onClick={toggleTooltip}
             >
               <svg
-                className="w-4 h-4 text-mid-gray cursor-help hover:text-logo-primary transition-colors duration-200 select-none"
+                className="w-4 h-4 text-mid-gray cursor-help hover:text-logo-primary transition-colors duration-200 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary rounded"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -121,8 +121,8 @@ export const SettingContainer: React.FC<SettingContainerProps> = ({
 
   // Horizontal layout (default)
   const horizontalContainerClasses = grouped
-    ? "flex items-center justify-between px-4 p-2"
-    : "flex items-center justify-between px-4 p-2 rounded-lg border border-mid-gray/20";
+    ? "flex items-center justify-between px-4 py-2"
+    : "flex items-center justify-between px-4 py-2 rounded-lg border border-mid-gray/20";
 
   if (descriptionMode === "tooltip") {
     return (
@@ -142,7 +142,7 @@ export const SettingContainer: React.FC<SettingContainerProps> = ({
               onClick={toggleTooltip}
             >
               <svg
-                className="w-4 h-4 text-mid-gray cursor-help hover:text-logo-primary transition-colors duration-200 select-none"
+                className="w-4 h-4 text-mid-gray cursor-help hover:text-logo-primary transition-colors duration-200 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary rounded"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

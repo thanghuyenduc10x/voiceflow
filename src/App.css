@@ -3,12 +3,28 @@
 @theme {
   /* Design tokens — 10X brand (navy + orange), always-dark */
   --color-text: #fbfbfb;
-  --color-background: #0A0A24;
-  --color-background-ui: #C96028;
-  --color-logo-primary: #C96028;
-  --color-logo-stroke: #FFFFFF;
+  --color-background: #0a0a24;
+  --color-background-ui: #c96028;
+  --color-logo-primary: #c96028;
+  --color-logo-stroke: #ffffff;
   --color-text-stroke: #f6f6f6;
   --color-mid-gray: #808080;
+
+  /* Secondary text — readable on navy (~6:1 WCAG AA), for section headers
+     and helper text. #808080 (mid-gray) on #0A0A24 is only ~4:1 and fails. */
+  --color-text-secondary: #a8acbd;
+
+  /* Semantic status colors, all legible on the navy background. Use these
+     instead of raw Tailwind green/red/blue which drift and aren't validated
+     for contrast on dark. */
+  --color-success: #34d399;
+  --color-warning: #f5b544;
+  --color-error: #f87171;
+  --color-info: #60a5fa;
+
+  /* Dark-theme elevation shadow for floating menus/dialogs (the default
+     low-alpha black shadows are invisible on navy). */
+  --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.55);
 }
 
 :root {
@@ -56,10 +72,10 @@
   :root {
     /* Colors - Dark Theme — 10X brand */
     --color-text: #fbfbfb;
-    --color-background: #0A0A24;
-    --color-background-ui: #C96028;
-    --color-logo-primary: #C96028;
-    --color-logo-stroke: #FFFFFF;
+    --color-background: #0a0a24;
+    --color-background-ui: #c96028;
+    --color-logo-primary: #c96028;
+    --color-logo-stroke: #ffffff;
   }
 }
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 type ModelStatus =
   | "ready"
@@ -25,12 +26,13 @@ const ModelStatusButton: React.FC<ModelStatusButtonProps> = ({
   onClick,
   className = "",
 }) => {
+  const { t } = useTranslation();
   const getStatusColor = (status: ModelStatus): string => {
     switch (status) {
       case "ready":
-        return "bg-green-400";
+        return "bg-success";
       case "loading":
-        return "bg-yellow-400 animate-pulse";
+        return "bg-warning animate-pulse";
       case "downloading":
         return "bg-logo-primary animate-pulse";
       case "verifying":
@@ -38,11 +40,12 @@ const ModelStatusButton: React.FC<ModelStatusButtonProps> = ({
       case "extracting":
         return "bg-logo-primary animate-pulse";
       case "error":
-        return "bg-red-400";
+        return "bg-error";
       case "unloaded":
         return "bg-mid-gray/60";
+      // "none" = no model yet → a next-step (orange), not an error (red).
       case "none":
-        return "bg-red-400";
+        return "bg-logo-primary/70";
       default:
         return "bg-mid-gray/60";
     }
@@ -51,8 +54,8 @@ const ModelStatusButton: React.FC<ModelStatusButtonProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 hover:text-text/80 transition-colors ${className}`}
-      title={`Model status: ${displayText}`}
+      className={`flex items-center gap-2 hover:text-text/80 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-logo-primary ${className}`}
+      title={t("common.modelStatus", { status: displayText })}
     >
       <div className={`w-2 h-2 rounded-full ${getStatusColor(status)}`} />
       <span className="max-w-28 truncate">{displayText}</span>

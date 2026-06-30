@@ -585,7 +585,11 @@
     "off": "Off",
     "yes": "Yes",
     "no": "No",
-    "noOptionsFound": "No options found"
+    "noOptionsFound": "No options found",
+    "downloading": "Downloading...",
+    "nDownloading": "{{count}} downloading...",
+    "selectOption": "Select an option...",
+    "modelStatus": "Model status: {{status}}"
   },
   "accessibility": {
     "permissionsRequired": "Accessibility Permissions Required",
