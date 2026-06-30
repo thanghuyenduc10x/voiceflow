@@ -1,12 +1,11 @@
 name: "VoiceFlow Windows Build"
 
-# Builds the Windows installer (.exe) on GitHub's free runners.
-# Trigger manually from the Actions tab, or automatically on push to main.
+# Builds the Windows installer (.exe) on demand for quick testing.
+# Releases are handled by release.yml (tag-triggered, all platforms), so this
+# is manual-only to avoid a redundant paid Windows build on every push to main.
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
