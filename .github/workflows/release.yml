@@ -85,7 +85,9 @@ jobs:
             build-args: ""
           - platform: "ubuntu-22.04"
             target: "x86_64-unknown-linux-gnu"
-            build-args: ""
+            # Ship .deb + .rpm only. The AppImage bundler (linuxdeploy) fails on the
+            # runner; .deb covers the vast majority of Linux desktop users anyway.
+            build-args: "--bundles deb,rpm"
     uses: ./.github/workflows/build.yml
     with:
       platform: ${{ matrix.platform }}
