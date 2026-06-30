@@ -1,0 +1,115 @@
+name: "VoiceFlow Release"
+
+# Full cross-platform release pipeline.
+#
+# Trigger: push a tag like `v0.8.4` (must match the version in tauri.conf.json),
+# or run manually from the Actions tab (uses the current version in the config).
+#
+# Flow:
+#   1. create-release  -> creates a DRAFT GitHub Release for v<version>
+#   2. build (matrix)  -> builds each platform, uploads installers + signed
+#                         updater artifacts, and merges latest.json into the release
+#   3. publish-release -> flips the draft to published
+#
+# Cost note (private repo): macOS runners bill at 10x the minute rate. If you
+# need to save minutes, comment out the two `*-apple-darwin` matrix entries and
+# keep building the DMG locally — Windows + Linux still ship via CI.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.create.outputs.release_id }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version from tauri.conf.json
+        id: version
+        run: |
+          VERSION=$(grep -o '"version": "[^"]*"' src-tauri/tauri.conf.json | cut -d'"' -f4)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Releasing v$VERSION"
+
+      - name: Create or reuse draft release
+        id: create
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = `v${{ steps.version.outputs.version }}`;
+            const { owner, repo } = context.repo;
+            let release;
+            try {
+              release = (await github.rest.repos.getReleaseByTag({ owner, repo, tag })).data;
+              core.info(`Reusing existing release ${tag} (#${release.id})`);
+            } catch (e) {
+              release = (await github.rest.repos.createRelease({
+                owner, repo,
+                tag_name: tag,
+                name: tag,
+                draft: true,
+                prerelease: false,
+                generate_release_notes: true,
+              })).data;
+              core.info(`Created draft release ${tag} (#${release.id})`);
+            }
+            core.setOutput('release_id', String(release.id));
+
+  build:
+    needs: create-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: "macos-latest"
+            target: "aarch64-apple-darwin"
+            build-args: "--target aarch64-apple-darwin"
+          - platform: "macos-latest"
+            target: "x86_64-apple-darwin"
+            build-args: "--target x86_64-apple-darwin"
+          - platform: "windows-latest"
+            target: "x86_64-pc-windows-msvc"
+            build-args: ""
+          - platform: "ubuntu-22.04"
+            target: "x86_64-unknown-linux-gnu"
+            build-args: ""
+    uses: ./.github/workflows/build.yml
+    with:
+      platform: ${{ matrix.platform }}
+      target: ${{ matrix.target }}
+      build-args: ${{ matrix.build-args }}
+      release-id: ${{ needs.create-release.outputs.release_id }}
+      asset-prefix: "voiceflow"
+      # Free path: no Apple/Windows code-signing. Updater (minisign) signing is
+      # still applied via the TAURI_SIGNING_PRIVATE_KEY secret in build.yml.
+      sign-binaries: false
+    secrets: inherit
+
+  publish-release:
+    needs: [create-release, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish the release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            await github.rest.repos.updateRelease({
+              owner, repo,
+              release_id: Number(${{ needs.create-release.outputs.release_id }}),
+              draft: false,
+            });
+            core.info('Release published.');
