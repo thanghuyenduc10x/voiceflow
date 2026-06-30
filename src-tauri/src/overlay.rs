@@ -400,10 +400,10 @@ pub fn hide_recording_overlay(app_handle: &AppHandle) {
 }
 
 pub fn emit_levels(app_handle: &AppHandle, levels: &Vec<f32>) {
-    // emit levels to main app
-    let _ = app_handle.emit("mic-level", levels);
-
-    // also emit to the recording overlay if it's open
+    // Emit ONLY to the recording overlay window — it is the sole consumer of
+    // mic levels. The previous global `app_handle.emit` also serialized this
+    // vector and pushed it into the main webview ~30-100×/sec during every
+    // recording, where nothing listens for it (pure wasted IPC + CPU).
     if let Some(overlay_window) = app_handle.get_webview_window("recording_overlay") {
         let _ = overlay_window.emit("mic-level", levels);
     }

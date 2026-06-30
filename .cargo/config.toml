@@ -1,1 +1,10 @@
 [build]
+
+# Apple Silicon (M-series) codegen tuning. The aarch64-apple-darwin target only
+# ever runs on M1+ Macs, so pinning target-cpu=apple-m1 is safe and lets the
+# compiler use NEON/Apple-Silicon codegen on our DSP hot paths (audio format
+# conversion, rubato resampling, the FFT visualizer). The heavy ML compute is
+# already on Metal, so this tunes our own glue code, not the model kernels.
+# Does NOT affect the Intel (x86_64-apple-darwin) build.
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "target-cpu=apple-m1"]
