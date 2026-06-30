@@ -341,6 +341,10 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GitHub runners have no FUSE, so the linuxdeploy AppImage can't run
+          # directly ("failed to run linuxdeploy"). Tell AppImages to extract and
+          # run instead of mounting via FUSE.
+          APPIMAGE_EXTRACT_AND_RUN: "1"
           APPLE_ID: ${{ inputs.sign-binaries && secrets.APPLE_ID || '' }}
           APPLE_ID_PASSWORD: ${{ inputs.sign-binaries && secrets.APPLE_ID_PASSWORD || '' }}
           APPLE_PASSWORD: ${{ inputs.sign-binaries && secrets.APPLE_PASSWORD || '' }}
