@@ -210,6 +210,20 @@ fn calculate_overlay_position(app_handle: &AppHandle) -> Option<(f64, f64)> {
 
     let settings = settings::get_settings(app_handle);
 
+    // A user-dragged position overrides the Top/Bottom anchor. Clamp it so the
+    // bar always stays at least partially on the cursor's monitor (otherwise a
+    // drag onto a now-disconnected display could lose it off-screen).
+    if let Some((cx, cy)) = settings.overlay_custom_position {
+        let margin = 20.0;
+        let min_x = monitor_x - OVERLAY_WIDTH + margin;
+        let max_x = monitor_x + monitor_width - margin;
+        let min_y = monitor_y;
+        let max_y = monitor_y + monitor_height - margin;
+        let x = cx.clamp(min_x, max_x);
+        let y = cy.clamp(min_y, max_y);
+        return Some((x, y));
+    }
+
     let x = monitor_x + (monitor_width - OVERLAY_WIDTH) / 2.0;
     let y = match settings.overlay_position {
         OverlayPosition::Top => monitor_y + OVERLAY_TOP_OFFSET,

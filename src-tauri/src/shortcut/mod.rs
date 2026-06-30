@@ -548,11 +548,35 @@ pub fn change_overlay_position_setting(app: AppHandle, position: String) -> Resu
         }
     };
     settings.overlay_position = parsed;
+    // Picking an anchor clears any user-dragged custom position (acts as reset).
+    settings.overlay_custom_position = None;
     settings::write_settings(&app, settings);
 
     // Update overlay position without recreating window
     crate::utils::update_overlay_position(&app);
 
+    Ok(())
+}
+
+/// Persists the overlay position after the user drags the recording bar.
+/// Coordinates are logical screen coordinates (matching calculate_overlay_position).
+#[tauri::command]
+#[specta::specta]
+pub fn set_overlay_custom_position(app: AppHandle, x: f64, y: f64) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.overlay_custom_position = Some((x, y));
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+/// Clears the custom dragged position, returning the bar to its anchor.
+#[tauri::command]
+#[specta::specta]
+pub fn reset_overlay_position(app: AppHandle) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.overlay_custom_position = None;
+    settings::write_settings(&app, settings);
+    crate::utils::update_overlay_position(&app);
     Ok(())
 }
 
