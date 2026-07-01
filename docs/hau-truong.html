@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hậu trường VoiceFlow — Từ ý tưởng đến bản cài tặng được</title>
+<meta name="description" content="Case study 10X: cách một app chép lời tiếng Việt được dựng, đóng gói đa nền tảng, vá lỗi và nâng cấp — viết lại để bạn cũng làm được." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --navy-950:#070718;--navy-900:#0A0A24;--navy-800:#12123A;--navy-700:#1A1A50;
+    --navy-300:#8888C0;--navy-200:#B0B0D8;
+    --o-600:#A84F20;--o-500:#C96028;--o-400:#D97538;--o-300:#E89060;
+    --green:#56a078;
+    --cream:#F8F7F4;--ink:#12123A;
+    --f-head:'Fraunces','Georgia',serif;--f-body:'Be Vietnam Pro',sans-serif;--f-mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--f-body);background:var(--navy-900);color:var(--navy-200);line-height:1.65;font-weight:400}
+  .wrap{max-width:880px;margin-inline:auto;padding:0 28px}
+  h1,h2,h3,h4{font-family:var(--f-head);color:#fff;line-height:1.12;letter-spacing:-.015em;font-weight:600}
+  em{font-style:normal;color:var(--o-400)}
+  code,.mono{font-family:var(--f-mono);font-size:.86em}
+
+  /* HERO */
+  .hero{background:radial-gradient(120% 100% at 50% -10%,var(--navy-700),var(--navy-950));padding:64px 0 48px;border-bottom:1px solid rgba(136,136,192,.14)}
+  .mark{display:flex;align-items:center;gap:13px;margin-bottom:26px}
+  .mark svg{width:42px;height:42px}
+  .mark .nm{font-family:var(--f-head);font-weight:700;font-size:1.2rem;color:#fff}
+  .mark .nm b{color:var(--o-400)}
+  .kicker{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--o-300);margin-bottom:14px}
+  .hero h1{font-size:clamp(2.1rem,5vw,3.2rem);margin-bottom:14px}
+  .hero p{font-size:1.08rem;color:var(--navy-200);max-width:62ch}
+  .hero .meta{margin-top:22px;font-family:var(--f-mono);font-size:.74rem;letter-spacing:.06em;color:var(--navy-300)}
+
+  section{padding:52px 0}
+  section + section{border-top:1px solid rgba(136,136,192,.1)}
+  .num{font-family:var(--f-mono);color:var(--o-500);font-weight:600;font-size:.82rem;letter-spacing:.12em}
+  section h2{font-size:clamp(1.6rem,4vw,2.3rem);margin:8px 0 8px}
+  .goal{display:flex;gap:12px;align-items:flex-start;background:rgba(201,96,40,.08);border:1px solid rgba(217,117,56,.28);border-radius:14px;padding:16px 18px;margin:18px 0 26px}
+  .goal svg{width:22px;height:22px;flex-shrink:0;margin-top:2px}
+  .goal b{color:#fff}
+
+  ol.steps{list-style:none;counter-reset:s;display:grid;gap:14px;margin:6px 0}
+  ol.steps li{counter-increment:s;position:relative;padding:14px 16px 14px 54px;background:linear-gradient(180deg,rgba(36,36,106,.26),rgba(18,18,58,.26));border:1px solid rgba(136,136,192,.16);border-radius:13px}
+  ol.steps li::before{content:counter(s);position:absolute;left:14px;top:13px;width:28px;height:28px;border-radius:8px;background:rgba(201,96,40,.16);border:1px solid rgba(217,117,56,.4);color:var(--o-300);font-family:var(--f-mono);font-weight:600;font-size:.85rem;display:grid;place-items:center}
+  ol.steps li b{color:#fff}
+  ol.steps li .hint{display:block;color:var(--navy-300);font-size:.92rem;margin-top:3px}
+
+  .tech{margin-top:20px;background:var(--navy-950);border:1px solid rgba(136,136,192,.18);border-radius:13px;overflow:hidden}
+  .tech .th{display:flex;align-items:center;gap:9px;padding:11px 16px;background:rgba(136,136,192,.07);border-bottom:1px solid rgba(136,136,192,.14);font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--navy-300)}
+  .tech .th svg{width:15px;height:15px;color:var(--o-400)}
+  .tech .tb{padding:14px 16px;font-family:var(--f-mono);font-size:.82rem;line-height:1.85;color:var(--navy-200);overflow-x:auto}
+  .tech .tb .c{color:var(--o-300)}
+  .tech .tb .muted{color:var(--navy-300)}
+  .tech .tb b{color:#fff;font-weight:600}
+
+  .callout{margin:22px 0;border-radius:14px;padding:18px 20px;border:1px solid}
+  .callout.warn{background:rgba(201,96,40,.07);border-color:rgba(217,117,56,.35)}
+  .callout.good{background:rgba(86,160,120,.08);border-color:rgba(86,160,120,.32)}
+  .callout h4{font-size:1.02rem;margin-bottom:6px;display:flex;align-items:center;gap:9px}
+  .callout h4 svg{width:18px;height:18px}
+  .callout.warn h4{color:var(--o-300)}
+  .callout.good h4{color:var(--green)}
+  .callout p{color:var(--navy-200);font-size:.97rem}
+  .callout p + p{margin-top:8px}
+  .callout .path{font-family:var(--f-mono);font-size:.82rem;color:#fff;background:rgba(0,0,0,.3);padding:2px 7px;border-radius:5px}
+
+  table.q{width:100%;border-collapse:collapse;margin-top:10px;font-size:.92rem}
+  table.q td{padding:10px 12px;border-bottom:1px solid rgba(136,136,192,.12);vertical-align:top}
+  table.q td:first-child{color:#fff;font-weight:600;white-space:nowrap;width:1%}
+
+  footer{border-top:1px solid rgba(136,136,192,.12);padding:34px 0 60px;color:var(--navy-300);font-size:.86rem;text-align:center;background:var(--navy-950)}
+  footer .mono{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--navy-300);margin-top:8px}
+
+  @media print{
+    body{background:#fff;color:#1c1c2b}
+    .hero{background:#fff;border-color:#e7e4df}
+    h1,h2,h3,h4,.mark .nm{color:var(--ink)}
+    ol.steps li{background:#faf9f7;border-color:#e7e4df;color:#1c1c2b}
+    .tech{background:#f4f3f0;border-color:#e0ddd6}.tech .tb{color:#333}
+    .goal{background:#fbf2ec}
+    footer{background:#fff}
+    section{padding:30px 0}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#EDEDFA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.3"/><path d="M12 18.6 L10.2 12.7 L12 12 L13.8 12.7 Z"/><path d="M12 5.4 L13.8 12 L12 12.7 L10.2 12 Z" fill="#C96028" stroke="#C96028"/><circle cx="12" cy="12" r="1.05" fill="#EDEDFA" stroke="none"/></svg>
+      <span class="nm">Voice<b>Flow</b> · Hậu trường</span>
+    </div>
+    <div class="kicker">Case study nội bộ · Cách một app ra đời</div>
+    <h1>Hậu trường VoiceFlow</h1>
+    <p>Từ một bản mã nguồn mở → app <em>chạy được</em> trên Mac &amp; Windows, có tự cập nhật — và cách vượt qua những con bọ dọc đường. Viết lại thành 4 quy trình để <b style="color:#fff">bạn cũng làm được</b>, không phải mò từ đầu.</p>
+    <div class="meta">01/07/2026 · Coach Thắng Huyền Đức · dựa trên VoiceFlow v0.8.5</div>
+  </div>
+</div>
+
+<!-- ============ 01 ============ -->
+<section>
+  <div class="wrap">
+    <div class="num">QUY TRÌNH 01</div>
+    <h2>Dựng lõi — chọn một việc, đứng trên vai người khổng lồ</h2>
+    <div class="goal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#D97538" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <div><b>Mục tiêu:</b> từ ý tưởng → app chạy được trên máy — bằng cách Việt hoá một nền mã nguồn mở tốt sẵn, thay vì viết lại từ số 0.</div>
+    </div>
+    <ol class="steps">
+      <li><b>Chốt một việc app làm thật tốt</b><span class="hint">VoiceFlow = nói tiếng Việt → chữ, chạy offline, riêng tư. Một mũi tên, một đích.</span></li>
+      <li><b>Đứng trên vai người khổng lồ</b><span class="hint">Không làm lại từ đầu. Fork một dự án mã nguồn mở đã tốt (app chép lời "Handy"), rồi cải tiến trên đó — tiết kiệm hàng tháng trời.</span></li>
+      <li><b>Việt hoá &amp; đổi nhận diện</b><span class="hint">Đặt tên VoiceFlow, màu navy/cam 10X, mặc định tiếng Việt, chọn model chuẩn cho giọng Việt (hiểu cả tiếng Anh xen kẽ).</span></li>
+      <li><b>Chạy lõi trên máy mình trước</b><span class="hint">Đảm bảo phần "ruột" nói-ra-chữ chạy đúng trên máy mình → rồi mới lo đóng gói cho người khác.</span></li>
+    </ol>
+    <div class="tech">
+      <div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3" stroke-linecap="round" stroke-linejoin="round"/></svg>Chi tiết kỹ thuật (cho Claude)</div>
+      <div class="tb">
+        <b>Nền:</b> Tauri (Rust + WebView) · whisper.cpp (Metal trên Mac, Vulkan trên Windows) · SQLite · xử lý âm thanh thuần Rust.<br>
+        <b>Nguồn gốc:</b> fork <span class="c">github.com/cjpais/Handy</span> → repo riêng <span class="c">github.com/thanghuyenduc10x/voiceflow</span> · bản gốc trên máy: <span class="c">~/App-VoiceFlow/Handy</span>.<br>
+        <b>Model chuẩn:</b> "VoiceFlow Standard" = large-v3-turbo-q5 (547MB) — nhanh, chính xác tiếng Việt. Mặc định ngôn ngữ <span class="c">vi</span>.<br>
+        <span class="muted">Bộ nhớ: voiceflow-project, voiceflow-updater-key.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 ============ -->
+<section>
+  <div class="wrap">
+    <div class="num">QUY TRÌNH 02</div>
+    <h2>Để máy chủ đóng gói 3 nền tảng — đừng build tay</h2>
+    <div class="goal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#D97538" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+      <div><b>Mục tiêu:</b> gắn một nhãn phiên bản → GitHub tự build bản Mac + Windows + Linux → tự đăng lên Releases. Không ngồi build tay từng bản.</div>
+    </div>
+    <ol class="steps">
+      <li><b>Viết "công thức" đóng gói tự động</b><span class="hint">GitHub Actions: một file quy trình build cho cả 3 hệ, tự ký để app cập nhật được.</span></li>
+      <li><b>Tạo khoá ký riêng cho app</b><span class="hint">Khoá kế thừa từ dự án gốc không dùng được (không có nửa khoá bí mật) → phải tự tạo khoá mới của mình.</span></li>
+      <li><b>Gắn nhãn phiên bản rồi đẩy lên</b><span class="hint">Tăng số (v0.8.5) → push → máy chủ tự chạy, khoảng 20–25 phút ra đủ bản cài.</span></li>
+      <li><b>Kiểm tra Releases đã có bản cài</b><span class="hint">Tải về máy "sạch" thử để chắc bạn bè mở là chạy.</span></li>
+    </ol>
+    <div class="callout warn">
+      <h4><svg viewBox="0 0 24 24" fill="none" stroke="#D97538" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>Lần đầu luôn trục trặc — và cách trị</h4>
+      <p>Lần đóng gói đầu, <b>cả 3 bản đều lỗi, mỗi bản một lý do khác nhau</b>: Mac cố nạp một "chứng chỉ rỗng"; Windows sai mật khẩu khoá; Linux thiếu công cụ đóng gói. Không có bản nào giống bản nào.</p>
+      <p><b>Bài học:</b> đừng đoán. Đọc <em>nhật ký lỗi</em> của từng bản, tìm đúng nguyên nhân gốc, vá từng cái — rồi chạy lại. Lần hai: xanh hết cả 4 bản.</p>
+    </div>
+    <div class="tech">
+      <div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3" stroke-linecap="round" stroke-linejoin="round"/></svg>Chi tiết kỹ thuật (cho Claude)</div>
+      <div class="tb">
+        <b>Phát hành:</b> GitHub Actions <span class="c">.github/workflows/release.yml</span> — kích hoạt bằng tag <span class="c">v*</span> → macOS (arm64 + Intel), Windows x64, Linux (deb + rpm) → tạo Release, gộp <span class="c">latest.json</span> cho tự cập nhật.<br>
+        <b>Khoá updater:</b> minisign, tạo cục bộ (miễn phí), lưu bí mật trên GitHub Secrets. Pubkey trong <span class="c">tauri.conf.json</span>.<br>
+        <b>Ký số:</b> lộ trình miễn phí (self-signed/ad-hoc) → app vẫn cần bước "Open Anyway" lần đầu trên Mac.<br>
+        <b>3 bẫy đã trị:</b> macOS truyền biến chứng chỉ rỗng → chỉ truyền khi thật sự ký; Windows khoá không mật khẩu bị từ chối → tạo lại khoá có mật khẩu; Linux linuxdeploy lỗi → ship .deb/.rpm, bật APPIMAGE_EXTRACT_AND_RUN.<br>
+        <span class="muted">Bộ nhớ: voiceflow-updater-key.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 ============ -->
+<section>
+  <div class="wrap">
+    <div class="num">QUY TRÌNH 03 · ⭐ CASE STUDY GỠ LỖI</div>
+    <h2>Săn con bọ "đơ" — đọc dấu vết, sửa tận gốc</h2>
+    <div class="goal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#D97538" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <div><b>Mục tiêu:</b> app treo cứng khi micro không dây rớt sóng giữa chừng → truy đến tận nguyên nhân gốc → vá cho tự phục hồi.</div>
+    </div>
+    <div class="callout warn">
+      <h4><svg viewBox="0 0 24 24" fill="none" stroke="#D97538" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>Triệu chứng</h4>
+      <p>Đang ghi âm, micro Bluetooth rớt kết nối → thanh ghi âm <b>đứng hình</b>, app kẹt ở trạng thái "đang bận" mãi mãi, chỉ tắt mở lại mới hết.</p>
+    </div>
+    <ol class="steps">
+      <li><b>Đọc nhật ký tìm dấu vết</b><span class="hint">Log chỉ thẳng: "thiết bị không còn khả dụng" → ngay sau đó "bỏ qua lệnh: đang bận". Có manh mối là có hướng.</span></li>
+      <li><b>Truy đến đúng chỗ kẹt</b><span class="hint">Luồng xử lý âm thanh đang "chờ mãi" một mẩu dữ liệu không bao giờ tới (vì micro đã chết), nên không nghe lệnh Dừng.</span></li>
+      <li><b>Sửa tận gốc, nhiều lớp</b><span class="hint">Luồng luôn kiểm lệnh Dừng mỗi vòng; khi micro chết thì tự báo "hết luồng" để thoát; thêm van an toàn.</span></li>
+      <li><b>Nhờ 3 "chuyên gia ảo" soi đối kháng</b><span class="hint">Trước khi tin bản vá, cho 3 góc nhìn độc lập cố tìm lỗi (kẹt lại · mất tiếng · hồi quy). Kết luận: an toàn.</span></li>
+    </ol>
+    <div class="callout good">
+      <h4><svg viewBox="0 0 24 24" fill="none" stroke="#56a078" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Kết quả</h4>
+      <p>Từ <b>treo vĩnh viễn phải khởi động lại</b> → giờ app tự nhận ra micro mất và phục hồi cho lần ghi sau. Bài học lớn: một lỗi "khó chịu" thường có một nguyên nhân gốc rất cụ thể — cứ đọc log và lần theo là ra.</p>
+    </div>
+    <div class="tech">
+      <div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3" stroke-linecap="round" stroke-linejoin="round"/></svg>Chi tiết kỹ thuật (cho Claude)</div>
+      <div class="tb">
+        <b>Gốc:</b> <span class="c">recorder.rs</span> — luồng consumer chặn trên <span class="c">recv()</span>, chỉ rút lệnh SAU khi có mẫu; thiết bị chết → không mẫu → Cmd::Stop không bao giờ tới → <span class="c">stop()</span> treo → pipeline kẹt "busy".<br>
+        <b>Vá:</b> rút lệnh mỗi vòng + <span class="c">recv_timeout(200ms)</span>; error callback set <span class="c">stream_dead</span> + gửi EndOfStream; đường dừng nhanh khi stream chết; <span class="c">stop()</span> chống treo.<br>
+        <b>Kiểm định:</b> workflow review 3 góc → <em>safe-to-ship</em>. Chế độ on-demand (mặc định) tự phục hồi bằng đóng+mở lại.<br>
+        <span class="muted">Bộ nhớ: voiceflow-freeze-bug.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 ============ -->
+<section>
+  <div class="wrap">
+    <div class="num">QUY TRÌNH 04</div>
+    <h2>Audit &amp; nâng cấp — từ 6 lên 9 điểm, có kiểm chứng</h2>
+    <div class="goal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#D97538" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+      <div><b>Mục tiêu:</b> đánh giá toàn diện, rồi nâng cấp những thứ người dùng cảm nhận được — không đập đi làm lại, không ôm hết một lần.</div>
+    </div>
+    <ol class="steps">
+      <li><b>Audit 3 góc song song</b><span class="hint">Cùng lúc soi: kiến trúc/cấu trúc · tốc độ trên chip Apple · giao diện &amp; trải nghiệm. Ba báo cáo độc lập.</span></li>
+      <li><b>Sửa cái cảm nhận được trước</b><span class="hint">Hết đơ; nhẹ &amp; nhanh hơn; chữ dễ đọc (đạt chuẩn tương phản); dùng được bằng bàn phím; hết chữ tiếng Anh sót.</span></li>
+      <li><b>Xây → chạy thử → soi lỗi → mới phát hành</b><span class="hint">Đóng gói bản thật, chạy thử trên máy, soi đối kháng — rồi mới đẩy ra cho người dùng.</span></li>
+      <li><b>Ghi rõ "để lại đợt sau"</b><span class="hint">Trung thực liệt kê phần chưa làm (rủi ro cao hơn) để làm sau, thay vì hứa hết.</span></li>
+    </ol>
+    <div class="tech">
+      <div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3" stroke-linecap="round" stroke-linejoin="round"/></svg>Chi tiết kỹ thuật (cho Claude)</div>
+      <div class="tb">
+        <b>Nâng cấp v0.8.5:</b> hết đơ (QT03) · bỏ gửi mức âm thừa sang cửa sổ chính · target-cpu=apple-m1 cho aarch64 · token màu chữ phụ + trạng thái (đạt WCAG AA) · sửa nút/panel "lạc tông" trên nền navy · bàn phím + viền focus · Việt hoá tự nhiên.<br>
+        <b>Để lại (khuyến nghị):</b> tách ngôn ngữ để mở app nhanh hơn · cache settings · hâm nóng model trước · gộp lệnh · làm lại onboarding tải model.<br>
+        <span class="muted">Bộ nhớ: voiceflow-v085-upgrade.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LESSONS ============ -->
+<section>
+  <div class="wrap">
+    <div class="num">RÚT GỌN</div>
+    <h2>6 bài học mang đi</h2>
+    <table class="q">
+      <tr><td>01</td><td><b style="color:#fff">Một việc, làm thật tốt.</b> Một app — một đích. Đừng ôm đồm.</td></tr>
+      <tr><td>02</td><td><b style="color:#fff">Đứng trên vai người khổng lồ.</b> Fork mã nguồn mở tốt sẵn, cải tiến trên đó — nhanh gấp nhiều lần làm từ 0.</td></tr>
+      <tr><td>03</td><td><b style="color:#fff">Để máy chủ đóng gói.</b> GitHub tự build Mac/Windows/Linux — đừng build tay từng bản.</td></tr>
+      <tr><td>04</td><td><b style="color:#fff">Lần đầu luôn trục trặc.</b> Bình thường. Đọc log, sửa đúng gốc, chạy lại — đừng đoán, đừng nản.</td></tr>
+      <tr><td>05</td><td><b style="color:#fff">Chạy thử + soi đối kháng rồi mới phát hành.</b> Đừng tin bản vá cho tới khi có bằng chứng nó chạy.</td></tr>
+      <tr><td>06</td><td><b style="color:#fff">Đánh số phiên bản mỗi lần.</b> v0.8.3 → v0.8.5… Mỗi lần đẩy là tăng số, ghi rõ "sửa gì".</td></tr>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Hậu trường VoiceFlow — một app ra đời trong một đêm, kể lại để bạn cũng làm được
+    <div class="mono">Tự Nhiên · Tự Do · Tự Động</div>
+  </div>
+</footer>
+
+</body>
+</html>
