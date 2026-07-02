@@ -23,3 +23,6 @@ jobs:
       upload-artifacts: true
       sign-binaries: false
       asset-prefix: "voiceflow"
+    # Updater (minisign) signing needs the TAURI_SIGNING_* secrets — without
+    # this the key arrives empty and signing fails ("Missing comment in secret key").
+    secrets: inherit
