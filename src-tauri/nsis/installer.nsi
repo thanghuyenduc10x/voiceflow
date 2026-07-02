@@ -153,6 +153,8 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 ; Installer pages, must be ordered as they appear
 ; 1. Welcome Page
 !define MUI_PAGE_CUSTOMFUNCTION_PRE SkipIfPassive
+!define MUI_WELCOMEPAGE_TITLE "Cài đặt VoiceFlow"
+!define MUI_WELCOMEPAGE_TEXT "VoiceFlow — Nói thành chữ, miễn phí, chạy 100% trên máy bạn (không cần mạng, không tài khoản).$\r$\n$\r$\nNếu bạn vừa thấy màn hình xanh 'Windows protected your PC' — đừng lo. Đó là bình thường với app miễn phí do tự ký (không đăng ký với Microsoft). Bạn chỉ cần bấm 'More info' rồi 'Run anyway' là đúng cách.$\r$\n$\r$\nBấm Next (Tiếp) để cài. Cài xong, mở VoiceFlow và cấp quyền Micrô khi được hỏi.$\r$\n$\r$\nHướng dẫn chi tiết: 10x-lifeos.com/voiceflow"
 !insertmacro MUI_PAGE_WELCOME
 
 ; 2. License Page (if defined)
